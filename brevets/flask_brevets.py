@@ -48,7 +48,7 @@ def page_not_found(error):
 #disabled for now
 #todo: make it export to a connected folder in docker
 #instead of as an endpoint on the server
-#"""
+"""
 
 
 @app.route("/source_gen_tests")
@@ -59,7 +59,7 @@ def source_gen_tests():
     
     return flask.send_file("generated_tests.py") 
 
-#"""
+"""
 
 ###############
 #

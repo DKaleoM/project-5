@@ -9,24 +9,24 @@ restart:
 	@(make clean; make install; make start)
 
 start:
-	@(cd brevets; if [ -f ../dockerContainer.txt ]; then docker stop $$(cat ../dockerContainer.txt); fi; docker build -t project5 .; docker run -d $$(cat ../docker_ports.txt) project5 > ../dockerContainer.txt )
+	@(docker compose up -d --build)
 
 stop:
-	@(cd brevets; docker stop $$(cat ../dockerContainer.txt))
+	@(docker compose down)
 
 terminal:
-	@(cd brevets; docker exec -it $$(cat ../dockerContainer.txt) /bin/bash)
+	@(docker exec -it "project-5-brevets-1" /bin/bash)
 
 test:
-	@(cd brevets; docker exec -it $$(cat ../dockerContainer.txt) ./run_tests.sh)
+	@(docker exec -it "project-5-brevets-1" ./run_tests.sh)
 
 run:
 	@(make restart)
 
 logs:
-	@(cd brevets; docker logs $$(cat ../dockerContainer.txt))
+	@(docker logs "project-5-brevets-1")
 
 clean:
-	@(cd brevets; docker stop $$(docker ps -a -q); docker rm $$(docker ps -a -q))
+	@(docker stop $$(docker ps -a -q); docker rm $$(docker ps -a -q))
 
 
