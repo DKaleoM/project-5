@@ -15,16 +15,16 @@ stop:
 	@(docker compose down)
 
 terminal:
-	@(docker exec -it "project-5-brevets-1" /bin/bash)
+	@(docker compose exec -it brevets /bin/bash)
 
 test:
-	@(docker exec -it "project-5-brevets-1" ./run_tests.sh)
+	@(docker compose exec -it brevets ./run_tests.sh)
 
 run:
 	@(make restart)
 
 logs:
-	@(docker logs "project-5-brevets-1")
+	@(docker compose logs brevets)
 
 clean:
 	@(docker stop $$(docker ps -a -q); docker rm $$(docker ps -a -q))
