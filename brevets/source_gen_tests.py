@@ -79,8 +79,8 @@ def create_tests_py():
         #todo: better format for this?
         #todo: why not just use json?
         [
-            (300, "2025-12-12T09:00"),
             ("Test Set 1: Basic 300km brevet", "Single brevet with times generated using the online calculator"),
+            (300, "2025-12-12T09:00"),
             (0, "2025-12-12T09:00", "2025-12-12T10:00"),
             (100, "2025-12-12T11:56", "2025-12-12T15:40"),
             (150, "2025-12-12T13:25", "2025-12-12T19:00"),
@@ -89,8 +89,9 @@ def create_tests_py():
             (330, "2025-12-12T18:00", "2025-12-13T05:00"),
         ],
         [
-            (1000, "2035-05-06T15:00"),
+            
             ("Test Set 2: Basic 1000km brevet", "Single brevet with times generated using the online calculator"),
+            (1000, "2035-05-06T15:00"),
             (0, "2035-05-06T15:00", "2035-05-06T16:00"),
             (300, "2035-05-07T00:00", "2035-05-07T11:00"),
             (600, "2035-05-07T09:48", "2035-05-08T07:00"),
@@ -98,8 +99,8 @@ def create_tests_py():
             (1100, "2035-05-08T00:05", "2035-05-09T18:00"),
         ],
         [
-            (200, "2035-07-06T12:00"),
             ("Test Set 3: short times", "Generated using the online calculator, to test the edge cases under 60km."),
+            (200, "2035-07-06T12:00"),
             (0, "2035-07-06T12:00", "2035-07-06T13:00"),
             (20, "2035-07-06T12:35", "2035-07-06T14:00"),
             (40, "2035-07-06T13:11", "2035-07-06T15:00"),
@@ -108,16 +109,16 @@ def create_tests_py():
             (70, "2035-07-06T14:04", "2035-07-06T16:40"),
         ],
         [
-            (200, "2035-07-06T12:00"),
             ("Test Set 4: times over brevet dist", "Tests to make sure times for distances over the brevet dist are same as at the brevet dist."),
+            (200, "2035-07-06T12:00"),
             (200, "2035-07-06T17:53", "2035-07-07T01:30"),
             (205, "2035-07-06T17:53", "2035-07-07T01:30"),
             (212, "2035-07-06T17:53", "2035-07-07T01:30"),
             (222, "2035-07-06T17:53", "2035-07-07T01:30"),
         ],
         [
-            (200, "2050-01-01T00:00"),
             ("Test Set 5: decimal distances", "Tests to make sure distances are rounded the same as the online calculator https://rusa.org/octime_acp.html"),
+            (200, "2050-01-01T00:00"),
             (99, "2050-01-01T02:55", "2050-01-01T06:36"),
             (99.4, "2050-01-01T02:55", "2050-01-01T06:36"),
             (99.6, "2050-01-01T02:56", "2050-01-01T06:40"),

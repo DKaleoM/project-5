@@ -77,7 +77,7 @@ docker exec -it $CONTAINER_ID /usr/bin/mongo
 List of databases:
 
 ```
-show dbs
+show dbsd
 ```
 
 Select database `brevets`:

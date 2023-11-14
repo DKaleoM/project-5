@@ -49,6 +49,8 @@
          {% endif %}
          {% endwith %}
          <!-- Design on bootstrap grid -->
+		 <button name="submitButton">Submit</button>
+		 <button name="displayButton">Display</button>
          <form role="form">
             <div class="row">
                <div class="col-md-4">
@@ -114,13 +116,12 @@
          <script type="text/javascript">
             var SCRIPT_ROOT = {{ request.script_root|tojson|safe }} ;
             var TIME_CALC_URL = SCRIPT_ROOT + "/_calc_times";
-
-            // FIX ME!
-            // Right now, only the kilometers are passed
-            // you need to pass much more!
-            // View flask_brevets.py for details.
-            function calc_times(control) {
+			var TIME_INSERT_URL = SCRIPT_ROOT + "/_insert_times";
+			var TIME_GET_URL = SCRIPT_ROOT + "/_get_times";
 			
+            
+            function calc_times(control) {
+			 console.log("control name: "+control.name);
               var km = control.find("input[name='km']").val();
 			  var brevet_dist = $("select[name='distance']").val();
 			  
@@ -138,13 +139,21 @@
 
               $.getJSON(TIME_CALC_URL, {km: km, start_time: start_time, brevet_dist: brevet_dist}).done(
                 function(data) {
-                   var times = data.result;
-                   console.log("Got a response: ");
-                   console.log("Response.open = " + times.open);
-                   // This part will automatically fill the open and close slots,
-                   // so don't worry about those.
-                   open_time_field.val(moment(times.open).format("YYYY-MM-DDTHH:mm"));
-                   close_time_field.val(moment(times.close).format("YYYY-MM-DDTHH:mm"));
+					var succeeded = data.succeeded;
+					console.log(succeeded);
+					if(succeeded){
+						var times = data.result;
+						console.log("Got a response: ");
+						console.log("Response.open = " + moment(times.open).format("YYYY-MM-DDTHH:mm"));
+						// This part will automatically fill the open and close slots,
+						// so don't worry about those.
+						open_time_field.val(moment(times.open).format("YYYY-MM-DDTHH:mm"));
+						close_time_field.val(moment(times.close).format("YYYY-MM-DDTHH:mm"));
+						console.log("succeded at km val: " + km);
+					} else{
+						console.log("error at km val: " + km);
+						window.alert(data.msg);
+					}
                  }
                ).fail(function(err){
                  // In case you get an error...
@@ -152,6 +161,69 @@
                  console.log(err);
                });
             }
+			
+			function store_times() {
+				var controls = $(".control");
+				
+				var km_vals = []
+				var open_vals = []
+				var close_vals = []
+				
+				var numStored = 0;
+				
+				controls.each(function(control){
+					var km = $( this ).find("input[name='km']").val();
+					
+					var open_time = moment($( this ).find("input[name='open']").val()).format("YYYY-MM-DDTHH:mm");
+				    var close_time = moment($( this ).find("input[name='close']").val()).format("YYYY-MM-DDTHH:mm");
+					
+					if(km.length > 0){
+					km_vals[numStored] = km;
+					open_vals[numStored] = open_time;
+					close_vals[numStored] = close_time;
+					
+					numStored++;
+					}
+				
+				});
+				
+				var brevet_dist = $("select[name='distance']").val();
+			  
+				var start_date_input = $("input[name='begin_date']").val();
+				var start_time = moment(start_date_input).format("YYYY-MM-DDTHH:mm");
+				
+				$.getJSON(TIME_INSERT_URL, {km_vals: JSON.stringify(km_vals), open_vals: JSON.stringify(open_vals), close_vals: JSON.stringify(close_vals), start_time: start_time, brevet_dist: brevet_dist}).done(
+                function(data) {
+					var succeeded = data.succeeded;
+					console.log(succeeded);
+					if(succeeded){
+						controls.each(function(control){
+							$(this).find("input[name='km']").val() = "";
+							$( this ).find("input[name='open']").val() = "";
+							$( this ).find("input[name='close']").val() = "";
+						});
+					} else{
+						console.log("error at km val: " + km);
+						window.alert(data.msg);
+					}
+                 }
+               ).fail(function(err){
+                 // In case you get an error...
+                 console.log("Error!");
+                 console.log(err);
+               });
+				
+				console.log(controls);
+				console.log(km_vals);
+			}
+			function display_times() {
+				var controls = $(".control").get();
+				console.log(controls);
+				
+			}
+			
+			$("button[name='submitButton']").on("click", store_times);
+			$("button[name='displayButton']").on("click", display_times);
 
             $(document).ready(function(){
              // Do the following when the page is finished loading

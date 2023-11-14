@@ -75,33 +75,65 @@ def _calc_times():
     Expects one URL-encoded argument, the number of miles.
     """
     app.logger.debug("Got a JSON request")
-    km = request.args.get('km', 1600, type=float)
-    brevet_dist = request.args.get('brevet_dist', 1600, type=int)
+    #read info from the request
+    km = request.args.get('km', None, type=float)
+    brevet_dist = request.args.get('brevet_dist', None, type=int)
     time_str = request.args.get('start_time',type=str)
+
+    if (km is None):
+        return flask.jsonify(succeeded = False, msg = "Error: invalid km value")
+    if (brevet_dist is None):
+        return flask.jsonify(succeeded = False, msg = "Error: invalid brevet_dist value")
+    if (km > brevet_dist * 1.2):
+        return flask.jsonify(succeeded = False, msg = "Checkpoint dist more than 20% over brevet dist is invalid")
     
+
+    start_time = arrow.get(time_str,"YYYY-MM-DDTHH:mm")
+
+    #log info for debugging purposes
     app.logger.debug("km={}".format(km))
     app.logger.debug("brevet_dist={}".format(brevet_dist))
     app.logger.debug("time_str={}".format(time_str))
     app.logger.debug("request.args: {}".format(request.args))
-
-    start_time = arrow.get(time_str,"YYYY-MM-DDTHH:mm")
-
     app.logger.debug("start_time={}".format(start_time.format('YYYY-MM-DDTHH:mm')))
-    
-    # FIXME!
-    # Right now, only the current time is passed as the start time
-    # and control distance is fixed to 200
-    # You should get these from the webpage!
-    
+
+    #calculate open and close time
     open_time = acp_times.open_time(km, brevet_dist, start_time).format('YYYY-MM-DDTHH:mm')
     
     close_time = acp_times.close_time(km, brevet_dist, start_time).format('YYYY-MM-DDTHH:mm')
     
+    #return the result
     result = {"open": open_time, "close": close_time}
 
     app.logger.debug("results={}".format(result))
     
-    return flask.jsonify(result=result)
+    return flask.jsonify(succeeded = True, result=result)
+
+@app.route("/_insert_times")
+def _insert_times():
+    km_vals = request.args.get('km_vals', None, type=list)
+    open_vals = request.args.get('open_vals', None, type=list)
+    close_vals = request.args.get('close_vals', None, type=list)
+
+    brevet_dist = request.args.get('brevet_dist', None, type=int)
+    time_str = request.args.get('start_time',type=str)
+
+    app.logger.debug("request.args: {}".format(request.args))
+
+    brevet_dist = request.args.get('brevet_dist', None, type=int)
+    time_str = request.args.get('start_time',type=str)
+
+    for i in range(len(km_vals))
+        
+
+    
+    
+    return flask.jsonify(succeeded = True)
+
+@app.route("/_get_times")
+def _get_times():
+    
+    pass
 
 
 #############

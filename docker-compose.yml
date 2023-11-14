@@ -6,3 +6,12 @@ services:
         command: flask_brevets.py
         ports: 
           - "5001:5000"
+        depends_on:
+            - mongodb
+        environment:
+            MONGODB_HOSTNAME: mongodb
+
+    mongodb:
+        image: mongo:5.0.5
+        ports:
+          - "27017:27017"
