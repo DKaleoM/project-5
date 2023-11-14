@@ -198,12 +198,12 @@
 					console.log(succeeded);
 					if(succeeded){
 						controls.each(function(control){
-							$(this).find("input[name='km']").val() = "";
-							$( this ).find("input[name='open']").val() = "";
-							$( this ).find("input[name='close']").val() = "";
+							$(this).find("input[name='km']").val("");
+							$(this).find("input[name='miles']").val("");
+							$( this ).find("input[name='open']").val("");
+							$( this ).find("input[name='close']").val("");
 						});
 					} else{
-						console.log("error at km val: " + km);
 						window.alert(data.msg);
 					}
                  }
@@ -217,8 +217,50 @@
 				console.log(km_vals);
 			}
 			function display_times() {
-				var controls = $(".control").get();
-				console.log(controls);
+				var controls = $(".control");
+				
+				$.getJSON(TIME_GET_URL, {}).done(
+                function(data) {
+					var succeeded = data.succeeded;
+					var result = data.result;
+					
+					console.log(succeeded);
+					console.log(result)
+					
+					if(succeeded){
+						//fill necessary controls and blank the rest
+						var i=0;
+						controls.each(function(control){
+						if(i < result.checkpoints.length){
+							var km = result.checkpoints[i].dist;
+							$(this).find("input[name='km']").val(km);
+							$(this).find("input[name='miles']").val((0.621371 * km).toFixed(6));
+							$( this ).find("input[name='open']").val(result.checkpoints[i].openTime);
+							$( this ).find("input[name='close']").val(result.checkpoints[i].closeTime);
+							i+=1;
+						}
+						else{
+							$(this).find("input[name='km']").val("");
+							$(this).find("input[name='miles']").val("");
+							$( this ).find("input[name='open']").val("");
+							$( this ).find("input[name='close']").val("");
+						}
+							
+						});
+						//set brevet dist and start time
+						$("select[name='distance']").val(result.dist);
+						$("input[name='begin_date']").val(result.startTime);
+						
+					} else{
+						window.alert(data.msg);
+					}
+                 }
+				 
+               ).fail(function(err){
+                 // In case you get an error...
+                 console.log("Error!");
+                 console.log(err);
+               });
 				
 			}
 			

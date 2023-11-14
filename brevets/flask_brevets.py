@@ -13,6 +13,8 @@ import config
 import source_gen_tests  #testing code source generation
 from source_gen_tests import create_tests_py
 
+import mongo_utils #for saving and loading brevets
+
 import logging
 
 ###
@@ -111,29 +113,37 @@ def _calc_times():
 
 @app.route("/_insert_times")
 def _insert_times():
-    km_vals = request.args.get('km_vals', None, type=list)
-    open_vals = request.args.get('open_vals', None, type=list)
-    close_vals = request.args.get('close_vals', None, type=list)
+    km_vals = request.args.get('km_vals', None, type=str)[1:-1].replace(" ", "").replace('"', "").split(",")
+    open_vals = request.args.get('open_vals', None, type=str)[1:-1].replace(" ", "").replace('"', "").split(",")
+    close_vals = request.args.get('close_vals', None, type=str)[1:-1].replace(" ", "").replace('"', "").split(",")
 
     brevet_dist = request.args.get('brevet_dist', None, type=int)
     time_str = request.args.get('start_time',type=str)
 
     app.logger.debug("request.args: {}".format(request.args))
 
-    brevet_dist = request.args.get('brevet_dist', None, type=int)
-    time_str = request.args.get('start_time',type=str)
+    brevet = mongo_utils.Brevet(brevet_dist, time_str)
 
-    for i in range(len(km_vals))
+    for i in range(len(km_vals)):
+        brevet.addCheckpoint(int(km_vals[i]),open_vals[i],close_vals[i])
         
+    db = mongo_utils.SingleBrevetDatabase("brevet")
 
-    
+    db.StoreBrevet(brevet)
     
     return flask.jsonify(succeeded = True)
 
 @app.route("/_get_times")
 def _get_times():
+
+    db = mongo_utils.SingleBrevetDatabase("brevet")
+
+    brevet = db.GetBrevet()
+
+    if brevet is None:
+        return flask.jsonify(succeeded = False, msg="No brevet saved yet!")
     
-    pass
+    return flask.jsonify(succeeded = True, result=brevet.toDict())
 
 
 #############
