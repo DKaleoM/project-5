@@ -115,21 +115,12 @@ def _calc_times():
 
 @app.route("/_times", methods=['POST'])
 def _insert_times():
-    app.logger.debug("insert times method")
-    """
-    try:
-        km_vals = json.loads(request.args.get('km_vals', None, type=str))#[1:-1].replace(" ", "").replace('"', "").split(",")
-        open_vals = json.loads(request.args.get('open_vals', None, type=str))#[1:-1].replace(" ", "").replace('"', "").split(",")
-        close_vals = json.loads(request.args.get('close_vals', None, type=str))#[1:-1].replace(" ", "").replace('"', "").split(",")
-    except Exception as e:
-        app.logger.debug(e)
-    """
     #we use request.json instead of request.args to get the data
-    #because this is a POST request
+    #because this is a POST request (and it should be json formatted)
     km_vals = request.json['km_vals']
     open_vals = request.json['open_vals']
     close_vals = request.json['close_vals']
-
+    
     brevet_dist = request.json['brevet_dist']
     time_str = request.json['start_time']
 
@@ -137,13 +128,13 @@ def _insert_times():
 
     #create brevet to store
     brevet = mongo_utils.Brevet(brevet_dist, time_str)
-
+    
     for i in range(len(km_vals)):
         brevet.addCheckpoint(km_vals[i],open_vals[i],close_vals[i])
         
     #add brevet as only item in collection "brevet"
     db = mongo_utils.SingleBrevetDatabase("brevet")
-
+    
     db.StoreBrevet(brevet)
 
     #return success
@@ -151,14 +142,15 @@ def _insert_times():
 
 @app.route("/_times", methods=['GET'])
 def _get_times():
-
+    #fetch brevet
     db = mongo_utils.SingleBrevetDatabase("brevet")
-
     brevet = db.GetBrevet()
 
     if brevet is None:
+        #special case with no brevet
         return flask.jsonify(succeeded = False, msg="No brevet saved yet!")
-    
+
+    #return brevet
     return flask.jsonify(succeeded = True, result=brevet.toDict())
 
 

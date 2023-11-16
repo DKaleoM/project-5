@@ -12,16 +12,16 @@ class SingleBrevetDatabase:
         self.collectionName = collectionName
 
     def StoreBrevet(self, brevet):
-        """Stores the brevet in the"""
+        """Stores the brevet in the database, replacing any already there."""
         
         db.get_collection(self.collectionName).replace_one({}, brevet.toDict(), True)
         
 
     def GetBrevet(self):
-        """Get the stored brevet
+        """Get the stored brevet.
 
-        Returns None if there is no brevet stored
-        Throws an error if something else goes wrong"""
+        Returns None if there is no brevet stored.
+        Throws an error if something else goes wrong."""
         try:
             documents = db.get_collection(self.collectionName).find()
 
@@ -38,6 +38,7 @@ class SingleBrevetDatabase:
     
 
     def DeleteBrevet(self):
+        """Deletes the stored brevet."""
         db.get_collection(self.collectionName).find_one_and_delete({})
 
 
@@ -53,11 +54,9 @@ class Brevet:
     def __init__(self, dist=None, startTime=None, sourceDict = None):
         """Takes brevet dist and start time parameters, add checkpoints with addCheckpoint(data).
 
-        Alternatively, provide a source dict"""
+        Alternatively, provide a source dict to load it as a brevet."""
         #todo: documentation for shorthand
         self.__immutable = False;
-
-        
 
         if sourceDict is not None:
             dist = sourceDict["dist"]
@@ -78,22 +77,26 @@ class Brevet:
         
 
     def isImmutable(self):
+        """Returns True if the Brevet is immutable, and False otherwise"""
         return self.__immutable;
 
     def setImmutable(self):
+        """Flags the Brevet as immutable, which will prevent checkpoints from being added."""
         self.__immutable = True;
 
     def addCheckpoint(self,dist,openTime,closeTime):
-        """adds an already calculated checkpoint to the brevet"""
+        """Adds an already calculated checkpoint to the brevet. Throws AttributeError if the brevet is immutable."""
         if self.__immutable:
             raise AttributeError("Tried to modify immutable Brevet")
         
         self.checkpoints += [{"dist":dist,"openTime":openTime,"closeTime":closeTime}]
 
     def getCheckpoints(self):
+        """Returns the checkpoints as a list of dictionaries"""
         return self.checkpoints
 
     def toDict(self):
+        """Returns a dictionary representation of the brevet"""
         data = {"dist":self.dist, "startTime":self.startTime}
 
         checkpoints = []
@@ -108,7 +111,6 @@ class Brevet:
     def __eq__(self, other):
         #I'm too tired to even think about if this is even slightly acceptable
         #but my guess would be no
-        print("checkpoint count: "+str(len(self.checkpoints)))
         list1 = [tuple([(k, v) for k, v in dictionary.items()]) for dictionary in self.checkpoints]
         list2 = [tuple([(k, v) for k, v in dictionary.items()]) for dictionary in other.checkpoints]
         return self.dist == other.dist and self.startTime == other.startTime and set(list1) == set(list2)

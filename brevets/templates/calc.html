@@ -49,8 +49,8 @@
          {% endif %}
          {% endwith %}
          <!-- Design on bootstrap grid -->
-		 <button name="submitButton">Submit</button>
-		 <button name="displayButton">Display</button>
+         <button name="submitButton">Submit</button>
+         <button name="displayButton">Display</button>
          <form role="form">
             <div class="row">
                <div class="col-md-4">
@@ -116,45 +116,42 @@
          <script type="text/javascript">
             var SCRIPT_ROOT = {{ request.script_root|tojson|safe }} ;
             var TIME_CALC_URL = SCRIPT_ROOT + "/_calc_times";
-			var TIMES_URL = SCRIPT_ROOT + "/_times";
-			//var TIME_INSERT_URL = SCRIPT_ROOT + "/_insert_times";
-			//var TIME_GET_URL = SCRIPT_ROOT + "/_get_times";
-			
+            var TIMES_URL = SCRIPT_ROOT + "/_times";
+            //var TIME_INSERT_URL = SCRIPT_ROOT + "/_insert_times";
+            //var TIME_GET_URL = SCRIPT_ROOT + "/_get_times";
+            
             
             function calc_times(control) {
-			 console.log("control name: "+control.name);
+			  //get data values
               var km = control.find("input[name='km']").val();
-			  var brevet_dist = $("select[name='distance']").val();
-			  
-			  var start_date_input = $("input[name='begin_date']").val();
-			  var start_time = moment(start_date_input).format("YYYY-MM-DDTHH:mm");
-			  
-			  console.log("start date input: " + start_date_input);
-			  console.log("start time: " + start_time);
-			  
-			  console.log("brevet dist: " + brevet_dist);
-			  
+              var brevet_dist = $("select[name='distance']").val();
+              
+              var start_date_input = $("input[name='begin_date']").val();
+              var start_time = moment(start_date_input).format("YYYY-MM-DDTHH:mm");
+              
               var open_time_field = control.find("input[name='open']");
               var close_time_field = control.find("input[name='close']");
-			  console.log("calculating times ");
+              console.log("calculating times ");
 
+              //submit get request from the time calculation url
               $.getJSON(TIME_CALC_URL, {km: km, start_time: start_time, brevet_dist: brevet_dist}).done(
                 function(data) {
-					var succeeded = data.succeeded;
-					console.log(succeeded);
-					if(succeeded){
-						var times = data.result;
-						console.log("Got a response: ");
-						console.log("Response.open = " + moment(times.open).format("YYYY-MM-DDTHH:mm"));
-						// This part will automatically fill the open and close slots,
-						// so don't worry about those.
-						open_time_field.val(moment(times.open).format("YYYY-MM-DDTHH:mm"));
-						close_time_field.val(moment(times.close).format("YYYY-MM-DDTHH:mm"));
-						console.log("succeded at km val: " + km);
-					} else{
-						console.log("error at km val: " + km);
-						window.alert(data.msg);
-					}
+                    var succeeded = data.succeeded;
+                    console.log(succeeded);
+                    if(succeeded){
+                        var times = data.result;
+                        //console.log("Got a response: ");
+                        //console.log("Response.open = " + moment(times.open).format("YYYY-MM-DDTHH:mm"));
+						
+                        // This part will automatically fill the open and close slots,
+                        // so don't worry about those.
+                        open_time_field.val(moment(times.open).format("YYYY-MM-DDTHH:mm"));
+                        close_time_field.val(moment(times.close).format("YYYY-MM-DDTHH:mm"));
+                        //console.log("succeded at km val: " + km);
+                    } else{
+                        //console.log("error at km val: " + km);
+                        window.alert(data.msg);
+                    }
                  }
                ).fail(function(err){
                  // In case you get an error...
@@ -162,126 +159,125 @@
                  console.log(err);
                });
             }
-			
-			function store_times() {
-				var controls = $(".control");
-				
-				var km_vals = []
-				var open_vals = []
-				var close_vals = []
-				
-				var numStored = 0;
-				
-				controls.each(function(control){
-					var km = $( this ).find("input[name='km']").val();
-					
-					var open_time = moment($( this ).find("input[name='open']").val()).format("YYYY-MM-DDTHH:mm");
-				    var close_time = moment($( this ).find("input[name='close']").val()).format("YYYY-MM-DDTHH:mm");
-					
-					if(km.length > 0){
-					//km vals should be integers
-					km_vals[numStored] = parseInt(km);
-					open_vals[numStored] = open_time;
-					close_vals[numStored] = close_time;
-					
-					numStored++;
-					}
-				
-				});
-				
-				//parse to integer
-				var brevet_dist = parseInt($("select[name='distance']").val());
-			  
-				var start_date_input = $("input[name='begin_date']").val();
-				var start_time = moment(start_date_input).format("YYYY-MM-DDTHH:mm");
-				
-				console.log(JSON.stringify(km_vals))
-				console.log(JSON.stringify({km_vals: km_vals, open_vals: open_vals, close_vals: close_vals, start_time: start_time, brevet_dist: brevet_dist}));
-				
-				$.ajax({
-				dataType: "json",
-				contentType: "application/json",
-				url: TIMES_URL,//times url is where we get and send a brevet
-				data: JSON.stringify({km_vals: km_vals, open_vals: open_vals, close_vals: close_vals, start_time: start_time, brevet_dist: brevet_dist}),
-				method: "POST",//post method because we are sending data to be stored
-				success:
+            
+            function store_times() {
+                var controls = $(".control");
+                
+				//this just... works
+				//javascript arrays are more like lists
+                var km_vals = []
+                var open_vals = []
+                var close_vals = []
+                
+                var numStored = 0;
+                
+                controls.each(function(control){
+                    var km = $( this ).find("input[name='km']").val();
+                    var open_time = moment($( this ).find("input[name='open']").val()).format("YYYY-MM-DDTHH:mm");
+                    var close_time = moment($( this ).find("input[name='close']").val()).format("YYYY-MM-DDTHH:mm");
+                    
+					//if the control is blank, don't send it to be stored
+                    if(km.length > 0){
+                    //km vals should be integers
+                    km_vals[numStored] = parseInt(km);
+					//the dates can stay as strings
+                    open_vals[numStored] = open_time;
+                    close_vals[numStored] = close_time;
+                    
+                    numStored++;
+                    }
+                
+                });
+                
+                //parse to integer
+                var brevet_dist = parseInt($("select[name='distance']").val());
+              
+			    //the dates can stay as strings
+                var start_date_input = $("input[name='begin_date']").val();
+                var start_time = moment(start_date_input).format("YYYY-MM-DDTHH:mm");
+                
+                $.ajax({
+                dataType: "json",
+                contentType: "application/json",
+                url: TIMES_URL,//times url is where we get and send a brevet
+                data: JSON.stringify({km_vals: km_vals, open_vals: open_vals, close_vals: close_vals, start_time: start_time, brevet_dist: brevet_dist}),
+                method: "POST",//post method because we are sending data to be stored
+                success:
                 function(data) {
-					var succeeded = data.succeeded;
-					console.log(succeeded);
-					if(succeeded){
-						controls.each(function(control){
-							$(this).find("input[name='km']").val("");
-							$(this).find("input[name='miles']").val("");
-							$( this ).find("input[name='open']").val("");
-							$( this ).find("input[name='close']").val("");
-						});
-					} else{
-						window.alert(data.msg);
-					}
+                    var succeeded = data.succeeded;
+                    console.log(succeeded);
+                    if(succeeded){
+                        controls.each(function(control){
+                            $(this).find("input[name='km']").val("");
+                            $(this).find("input[name='miles']").val("");
+                            $( this ).find("input[name='open']").val("");
+                            $( this ).find("input[name='close']").val("");
+                        });
+                    } else{
+                        //if the request didn't succeed
+                        window.alert(data.msg);
+                    }
                  },
-				error:
+                error:
                 function(err){
                  // In case you get an error...
                  console.log("Error!");
                  console.log(err);
-			    }
-				});
-				
-				console.log(controls);
-				console.log(km_vals);
-			}
-			function display_times() {
-				var controls = $(".control");
-				//getJSON uses a get request
-				//which is how we fetch the data
-				//times url is where we get and send a brevet
-				$.getJSON(TIMES_URL, {}).done(
+                }
+                });
+            }
+            function display_times() {
+                var controls = $(".control");
+                //getJSON uses a get request
+                //which is how we fetch the data
+                //times url is where we get and send a brevet
+                $.getJSON(TIMES_URL, {}).done(
                 function(data) {
-					var succeeded = data.succeeded;
-					var result = data.result;
-					
-					console.log(succeeded);
-					console.log(result)
-					
-					if(succeeded){
-						//fill necessary controls and blank the rest
-						var i=0;
-						controls.each(function(control){
-						if(i < result.checkpoints.length){
-							var km = result.checkpoints[i].dist;
-							$(this).find("input[name='km']").val(km);
-							$(this).find("input[name='miles']").val((0.621371 * km).toFixed(6));
-							$( this ).find("input[name='open']").val(result.checkpoints[i].openTime);
-							$( this ).find("input[name='close']").val(result.checkpoints[i].closeTime);
-							i+=1;
-						}
-						else{
-							$(this).find("input[name='km']").val("");
-							$(this).find("input[name='miles']").val("");
-							$( this ).find("input[name='open']").val("");
-							$( this ).find("input[name='close']").val("");
-						}
-							
-						});
-						//set brevet dist and start time
-						$("select[name='distance']").val(result.dist);
-						$("input[name='begin_date']").val(result.startTime);
-						
-					} else{
-						window.alert(data.msg);
-					}
+                    var succeeded = data.succeeded;
+                    var result = data.result;
+                    
+                    if(succeeded){
+                        //fill necessary controls and blank the rest
+                        var i=0;
+                        controls.each(function(control){
+                        if(i < result.checkpoints.length){
+                            //display loaded values
+                            var km = result.checkpoints[i].dist;
+                            $(this).find("input[name='km']").val(km);
+                            $(this).find("input[name='miles']").val((0.621371 * km).toFixed(6));
+                            $( this ).find("input[name='open']").val(result.checkpoints[i].openTime);
+                            $( this ).find("input[name='close']").val(result.checkpoints[i].closeTime);
+                            i+=1;
+                        }
+                        else{
+                            //clear remaining fields
+                            $(this).find("input[name='km']").val("");
+                            $(this).find("input[name='miles']").val("");
+                            $( this ).find("input[name='open']").val("");
+                            $( this ).find("input[name='close']").val("");
+                        }
+                            
+                        });
+                        //set brevet dist and start time
+                        $("select[name='distance']").val(result.dist);
+                        $("input[name='begin_date']").val(result.startTime);
+                        
+                    } else{
+                        //if the request didn't succeed
+                        window.alert(data.msg);
+                    }
                  }
-				 
+                 
                ).fail(function(err){
                  // In case you get an error...
                  console.log("Error!");
                  console.log(err);
                });
-				
-			}
-			
-			$("button[name='submitButton']").on("click", store_times);
-			$("button[name='displayButton']").on("click", display_times);
+                
+            }
+            
+            $("button[name='submitButton']").on("click", store_times);
+            $("button[name='displayButton']").on("click", display_times);
 
             $(document).ready(function(){
              // Do the following when the page is finished loading

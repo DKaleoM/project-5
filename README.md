@@ -30,10 +30,14 @@ including the one with the data structure for requests.
 
 https://flask.palletsprojects.com/en/3.0.x/
 
-For misc python stuff: w3schools 
+For misc python and javascript stuff: w3schools 
 
 https://www.w3schools.com/howto/howto_js_redirect_webpage.asp
 
 For docker compose: docker docs
 
 https://docs.docker.com/compose/gettingstarted/
+
+For jquery stuff (mostly to learn how to use post with ajax):
+
+https://api.jquery.com/
