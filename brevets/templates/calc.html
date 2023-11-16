@@ -116,8 +116,9 @@
          <script type="text/javascript">
             var SCRIPT_ROOT = {{ request.script_root|tojson|safe }} ;
             var TIME_CALC_URL = SCRIPT_ROOT + "/_calc_times";
-			var TIME_INSERT_URL = SCRIPT_ROOT + "/_insert_times";
-			var TIME_GET_URL = SCRIPT_ROOT + "/_get_times";
+			var TIMES_URL = SCRIPT_ROOT + "/_times";
+			//var TIME_INSERT_URL = SCRIPT_ROOT + "/_insert_times";
+			//var TIME_GET_URL = SCRIPT_ROOT + "/_get_times";
 			
             
             function calc_times(control) {
@@ -178,7 +179,8 @@
 				    var close_time = moment($( this ).find("input[name='close']").val()).format("YYYY-MM-DDTHH:mm");
 					
 					if(km.length > 0){
-					km_vals[numStored] = km;
+					//km vals should be integers
+					km_vals[numStored] = parseInt(km);
 					open_vals[numStored] = open_time;
 					close_vals[numStored] = close_time;
 					
@@ -187,12 +189,22 @@
 				
 				});
 				
-				var brevet_dist = $("select[name='distance']").val();
+				//parse to integer
+				var brevet_dist = parseInt($("select[name='distance']").val());
 			  
 				var start_date_input = $("input[name='begin_date']").val();
 				var start_time = moment(start_date_input).format("YYYY-MM-DDTHH:mm");
 				
-				$.getJSON(TIME_INSERT_URL, {km_vals: JSON.stringify(km_vals), open_vals: JSON.stringify(open_vals), close_vals: JSON.stringify(close_vals), start_time: start_time, brevet_dist: brevet_dist}).done(
+				console.log(JSON.stringify(km_vals))
+				console.log(JSON.stringify({km_vals: km_vals, open_vals: open_vals, close_vals: close_vals, start_time: start_time, brevet_dist: brevet_dist}));
+				
+				$.ajax({
+				dataType: "json",
+				contentType: "application/json",
+				url: TIMES_URL,//times url is where we get and send a brevet
+				data: JSON.stringify({km_vals: km_vals, open_vals: open_vals, close_vals: close_vals, start_time: start_time, brevet_dist: brevet_dist}),
+				method: "POST",//post method because we are sending data to be stored
+				success:
                 function(data) {
 					var succeeded = data.succeeded;
 					console.log(succeeded);
@@ -206,20 +218,24 @@
 					} else{
 						window.alert(data.msg);
 					}
-                 }
-               ).fail(function(err){
+                 },
+				error:
+                function(err){
                  // In case you get an error...
                  console.log("Error!");
                  console.log(err);
-               });
+			    }
+				});
 				
 				console.log(controls);
 				console.log(km_vals);
 			}
 			function display_times() {
 				var controls = $(".control");
-				
-				$.getJSON(TIME_GET_URL, {}).done(
+				//getJSON uses a get request
+				//which is how we fetch the data
+				//times url is where we get and send a brevet
+				$.getJSON(TIMES_URL, {}).done(
                 function(data) {
 					var succeeded = data.succeeded;
 					var result = data.result;

@@ -15,6 +15,8 @@ from source_gen_tests import create_tests_py
 
 import mongo_utils #for saving and loading brevets
 
+import json #to parse requests sent to us
+
 import logging
 
 ###
@@ -111,29 +113,43 @@ def _calc_times():
     
     return flask.jsonify(succeeded = True, result=result)
 
-@app.route("/_insert_times")
+@app.route("/_times", methods=['POST'])
 def _insert_times():
-    km_vals = request.args.get('km_vals', None, type=str)[1:-1].replace(" ", "").replace('"', "").split(",")
-    open_vals = request.args.get('open_vals', None, type=str)[1:-1].replace(" ", "").replace('"', "").split(",")
-    close_vals = request.args.get('close_vals', None, type=str)[1:-1].replace(" ", "").replace('"', "").split(",")
+    app.logger.debug("insert times method")
+    """
+    try:
+        km_vals = json.loads(request.args.get('km_vals', None, type=str))#[1:-1].replace(" ", "").replace('"', "").split(",")
+        open_vals = json.loads(request.args.get('open_vals', None, type=str))#[1:-1].replace(" ", "").replace('"', "").split(",")
+        close_vals = json.loads(request.args.get('close_vals', None, type=str))#[1:-1].replace(" ", "").replace('"', "").split(",")
+    except Exception as e:
+        app.logger.debug(e)
+    """
+    #we use request.json instead of request.args to get the data
+    #because this is a POST request
+    km_vals = request.json['km_vals']
+    open_vals = request.json['open_vals']
+    close_vals = request.json['close_vals']
 
-    brevet_dist = request.args.get('brevet_dist', None, type=int)
-    time_str = request.args.get('start_time',type=str)
+    brevet_dist = request.json['brevet_dist']
+    time_str = request.json['start_time']
 
-    app.logger.debug("request.args: {}".format(request.args))
+    app.logger.debug("request.json: {}".format(request.json))
 
+    #create brevet to store
     brevet = mongo_utils.Brevet(brevet_dist, time_str)
 
     for i in range(len(km_vals)):
-        brevet.addCheckpoint(int(km_vals[i]),open_vals[i],close_vals[i])
+        brevet.addCheckpoint(km_vals[i],open_vals[i],close_vals[i])
         
+    #add brevet as only item in collection "brevet"
     db = mongo_utils.SingleBrevetDatabase("brevet")
 
     db.StoreBrevet(brevet)
-    
+
+    #return success
     return flask.jsonify(succeeded = True)
 
-@app.route("/_get_times")
+@app.route("/_times", methods=['GET'])
 def _get_times():
 
     db = mongo_utils.SingleBrevetDatabase("brevet")
